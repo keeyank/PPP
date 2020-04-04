@@ -1,0 +1,9 @@
+To compile 2 cpp files and link them, do this:
+
+g++ -I/usr/local/include -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -D_THREAD_SAFE -D_REENTRANT -c '[file1].cpp'
+g++ -I/usr/local/include -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -D_THREAD_SAFE -D_REENTRANT -c '[file2].cpp'
+g++ -o fltk_test [file1].o [file2].o /usr/local/lib/libfltk.a -framework Cocoa
+
+This can be extended to more than 2 files pretty easily.
+
+Here is a useful makefile tutorial: https://www.gnu.org/software/make/manual/make.html#Rule-Introduction

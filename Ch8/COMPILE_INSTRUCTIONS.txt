@@ -1,0 +1,2 @@
+https://stackoverflow.com/questions/3820384/compiling-linking-multiple-files-in-c
+-c command means "only compile, don't link"

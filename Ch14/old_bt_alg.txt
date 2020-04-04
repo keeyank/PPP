@@ -1,0 +1,11 @@
+	// int& width = tree_width;
+	// Point currpos = origin;
+	// for (int i = 1; i <= pow(2, levels); i *= 2) {
+	// 	int start = origin.x - width/2;
+	// 	for (int j = 1; j < 2*i; j += 2) {
+	// 		double currpos_x = start + (j/((double)(2*i)))*width;
+	// 		currpos.x = (int)currpos_x;
+	// 		nodes.push_back(new Ellipse{currpos, node_width, node_height});
+	// 	}
+	// 	currpos.y += line_height;
+	// }
