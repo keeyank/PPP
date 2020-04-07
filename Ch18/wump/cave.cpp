@@ -1,49 +1,27 @@
-#include <iostream>
 #include <sstream>
-#include <vector>
 #include <iomanip>
 
-using namespace std;
+#include "cave.h"
 
-constexpr int total_rooms = 6;
-constexpr int adj_count = 3; // Amount of adjacent rooms for
-								// each room
+Room::Room() // Needed for Cave's constructor
+	: adj(Cave::adj_count) { }
 
-struct Room {
-
-	Room() // Needed for Cave's constructor
-		: adj(adj_count) { }
-
-	// Invariant - Number within range [0,total_rooms)
-	Room(int num) 
-		: adj(adj_count), n{num}
-	{
-		if (n < 0 || n >= total_rooms) {
-			ostringstream error_msg;
-			error_msg << "Room::Room: Room number must be within"
-				<< " range [0," << total_rooms << ") (number was "
-				<< n << ")";
-			throw runtime_error(error_msg.str());
-		}
+Room::Room(int num) 
+	: adj(Cave::adj_count), n{num}
+{
+	if (n < 0 || n >= Cave::total_rooms) {
+		ostringstream error_msg;
+		error_msg << "Room::Room: Room number must be within"
+			<< " range [0," << Cave::total_rooms  
+			<< ") (number was " << n << ")";
+		throw runtime_error(error_msg.str());
 	}
-
-	friend ostream& operator<<(ostream& is, const Room& r);
-
-	int num() const {return n;}
-
-	// Adjacent rooms
-	vector<Room*> adj; // Not private (Managed by Cave)
-
-private:
-	int n = -1;
-	bool bat = false;
-	bool pit = false;
-};
+}
 
 ostream& operator<<(ostream& os, const Room& r) {
 	os << "\nRoom #" << setw(3) << r.n << " at loc "
 		<< &r << "\nAdjacents:";
-	for (int i = 0; i < adj_count; ++i) {
+	for (int i = 0; i < Cave::adj_count; ++i) {
 		if (r.adj.at(i)) {
 			os << "\nRoom #" << setw(3) << r.adj[i]->n 
 				<< " at loc " << r.adj[i];
@@ -55,45 +33,49 @@ ostream& operator<<(ostream& os, const Room& r) {
 	return os << endl;
 }
 
-// Cave manages the connections between rooms
-struct Cave {
-	Cave();
-
-	friend ostream& operator<<(ostream& os, const Cave& c);
-private:
-	vector<Room> rooms;
-
-	void connect_rooms();
-};
-
+/*
+Randomly connect each room in the rooms vector
+This is done by setting their adjacency vectors properly
+After its execution, each room is connected to exactly 3 rooms
+The 3 rooms are unique and no room is connected to itself
+Easier said than done!
+*/
 void Cave::connect_rooms() {
 	srand(time(nullptr));
+
 	for (int i = 0; i < total_rooms; ++i) {
 		Room& curr_room = rooms.at(i);
 
 		for (int j = 0; j < adj_count; ++j) {
+			vector<int>& curr_avail = avail.at(i);
 
-			Room* rand_room = &rooms.at(rand() % total_rooms);
-			while (rand_room->num() == curr_room.num()) {
-				rand_room = &rooms.at(rand() % total_rooms);
-			}
-			
+			int range = curr_avail.size();
+			int room_num = curr_avail.at(rand() % range);
+
+			Room* rand_room = &rooms.at(room_num);
 			curr_room.adj.at(j) = rand_room;
 		}
 	}
 }
 
 Cave::Cave()
-	: rooms(total_rooms)
+	: rooms(total_rooms), avail(total_rooms)
 {
 	for (int i = 0; i < total_rooms; ++i) {
 		rooms.at(i) = Room{i}; // Calls (default) copy assignment
+
+		// Construct avail
+		for (int j = 0; j < total_rooms; ++j) {
+			if (j != i) {
+				avail.at(i).push_back(j);
+			}
+		}
 	}
 	connect_rooms();
 }
 
 ostream& operator<<(ostream& os, const Cave& c) {
-	for (int i = 0; i < total_rooms; ++i) {
+	for (int i = 0; i < Cave::total_rooms; ++i) {
 		os << c.rooms.at(i);
 	}
 	return os;
