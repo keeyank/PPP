@@ -5,6 +5,9 @@ using namespace std;
 // Dynamic c-string - allows for characters to be
 // added during runtime
 // Very simple - no protection for members (probably not good)
+// This should have copy constructor / assignment, 
+// and move constructor / assignment, but the code below
+// only uses it very simply, so it's ok in this context
 struct Dynamic_cstr {
 	Dynamic_cstr()
 		: str{new char[1]}, size{0}, buff_size{1}
