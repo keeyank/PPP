@@ -1,0 +1,21 @@
+1.
+template<typename T>
+void Vector_set<T>::remove(T elem) {
+	for (auto it = set.begin(); it != set.end(); ++it) {
+		if (*it == elem) {
+			set.erase(it); 
+			//return; 
+		}
+	}
+}
+
+This gives a segfault compile when return is commented out, and you erase the
+last element! The reason why is because of the condition (it != set.end()). set.end()
+becomes a lower point in memory after we erase the last element, when we increment it
+again, it will be greater than set.end(), making the condition true when it shouldn't
+be. This means that we will dereference somewhere in memory that we shouldn't!!
+So change the condition to <, and it will fix the problem (or simply comment out
+the return, but you might as well have both to make it as bug-free as possible)
+
+2.
+You need to put your template class implementation in the header file, rather than in it's own cpp file. This is because the compiler needs to know what kind of type is being operated on so it can generate the proper functions/class that it needs. If you have an implementation file for a template class, you're trying to compile a file where the types are unknown, and the compiler won't be able to generate any functions (since it needs the corresponding type before it generates template functions/classes). Read more in Chapter 19 of PPP (I think 19.3.1, 19.3.1, 19.3.6 explain why)
