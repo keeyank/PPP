@@ -4,7 +4,7 @@
 using namespace std;
 
 /*
-Set that supports random access
+Set that supports accessing random elements
 Only supports types that support copying (for pass-by-value), 
 equality comparisons (for checking if an element is in set),
 and the << operator (for debugging)
@@ -12,7 +12,7 @@ Also, must be able to be a template parameter for vector
 */
 template <typename T> 
 struct Vector_set {
-	Vector_set();
+	Vector_set() { }
 
 	// Return true if elem in set, else return false
 	bool in(T elem) const;
@@ -38,11 +38,6 @@ private:
 	// Invariant - no duplicate elements in set
 	vector<T> set;
 };
-
-template<typename T>
-Vector_set<T>::Vector_set() {
-	srand(time(nullptr));
-}
 
 template<typename T>
 void Vector_set<T>::insert(T elem) {

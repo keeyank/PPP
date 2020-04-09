@@ -1,44 +1,29 @@
-#include <sstream>
-#include <iomanip>
-
 #include "cave.h"
 
-Room::Room() // Needed for Cave's constructor
-	: adj(Cave::adj_count) { }
+/* Cave State Functions */
 
-Room::Room(int num) 
-	: adj(Cave::adj_count), n{num}
-{
-	if (n < 0 || n >= Cave::total_rooms) {
-		ostringstream error_msg;
-		error_msg << "Room::Room: Room number must be within"
-			<< " range [0," << Cave::total_rooms  
-			<< ") (number was " << n << ")";
-		throw runtime_error(error_msg.str());
+/*
+Add cause item (pit, bat, wump), surrounded by effect item
+(wind, breeze, stink) to cave at room r. 
+*/
+void Cave::add_cause_item(Room& r, Item cause, Item effect) {
+	r.add_item(cause);
+	for (int i = 0; i < adj_count; ++i) {
+		Room& adj_room = *r.adj.at(i);
+		adj_room.add_item(effect); 
 	}
 }
 
-bool Room::has_adj() {
-	for (int i = 0; i < Cave::adj_count; ++i) {
-		if (adj.at(i) == nullptr) return true;
+/*
+Remove all instances of i from the cave.
+*/
+void Cave::remove_all(Item itm) {
+	for (int i = 0; i < total_rooms; ++i) {
+		rooms.at(i).remove_item(itm);
 	}
-	return false;
 }
 
-ostream& operator<<(ostream& os, const Room& r) {
-	os << "\nRoom #" << setw(3) << r.n << " at loc "
-		<< &r << "\nAdjacents:";
-	for (int i = 0; i < Cave::adj_count; ++i) {
-		if (r.adj.at(i)) {
-			os << "\nRoom #" << setw(3) << r.adj[i]->n 
-				<< " at loc " << r.adj[i];
-		}
-		else {
-			os << "\nnullptr";
-		}
-	}
-	return os << endl;
-}
+/* Constructor Functions */
 
 /*
 Return true whenever r1 and r2 are in eachother's 
@@ -47,6 +32,30 @@ availability sets
 bool Cave::connectable(const Room& r1, const Room& r2) {
 	return avail.at(r1.num()).in(r2.num()) 
 		&& avail.at(r2.num()).in(r1.num());
+}
+
+// Remove room #n from all availability sets
+void Cave::remove_from_avail(int n) {
+	for (int i = 0; i < total_rooms; ++i) {
+		avail.at(i).remove(n);
+	}
+}
+
+/*
+Initialize data structures so rooms can be connected
+Set up rooms vector and availability sets
+*/
+void Cave::construct_rooms() {
+	for (int i = 0; i < total_rooms; ++i) {
+		rooms.at(i) = Room{i}; // Calls (default) copy assignment
+
+		// Construct avail
+		for (int j = 0; j < total_rooms; ++j) {
+			if (j != i) {
+				avail.at(i).insert(j);
+			}
+		}
+	}
 }
 
 /*
@@ -86,13 +95,6 @@ void Cave::connect(Room& r1, Room& r2) {
 	}
 }
 
-// Remove room #n from all availability sets
-void Cave::remove_from_avail(int n) {
-	for (int i = 0; i < total_rooms; ++i) {
-		avail.at(i).remove(n);
-	}
-}
-
 /*
 Randomly connect each room in the rooms vector
 This is done by setting their adjacency vectors properly
@@ -109,8 +111,8 @@ void Cave::connect_rooms() {
 				continue;
 
 			Vector_set<int>& curr_avail = avail.at(i);
-			int room_num = curr_avail.get_rand();
-			Room& rand_room = rooms.at(room_num);
+			int rnum = curr_avail.get_rand();
+			Room& rand_room = rooms.at(rnum);
 
 			connect(curr_room, rand_room);
 			curr_room.adj.at(j) = &rand_room;
@@ -118,24 +120,64 @@ void Cave::connect_rooms() {
 	}
 }
 
+/*
+Add items to each room, providing the state of each room.
+Ensures the cave is in a good state - the rules of Hunt the
+Wumpus are not broken.
+Doesn't need to be random - the randomness in connect_rooms
+takes care of that for us. This allows us to guarantee that
+room 0 has no cause items (but it may have effect items)
+*/
+void Cave::add_states() {
+	if (pit_count+bat_count+1 >= total_rooms) { // 1 for wumpus
+		throw runtime_error("Cave::add_states: Not enough rooms"
+					" to hold all of the items");
+	}
+	
+	int rnum = 1; // Keeps track of current room num
+	for (int i = 0; i < pit_count; ++i) {
+		add_cause_item(rooms.at(rnum), Item::pit, Item::wind);
+		++rnum;
+	}
+	for (int i = 0; i < bat_count; ++i) {
+		add_cause_item(rooms.at(rnum), Item::bat, Item::noise);
+		++rnum;
+	}
+	add_cause_item(rooms.at(rnum), Item::wump, Item::stink);
+	wump_rnum = rnum;
+}
+
 Cave::Cave()
 	: rooms(total_rooms), avail(total_rooms)
 {
-	for (int i = 0; i < total_rooms; ++i) {
-		rooms.at(i) = Room{i}; // Calls (default) copy assignment
-
-		// Construct avail
-		for (int j = 0; j < total_rooms; ++j) {
-			if (j != i) {
-				avail.at(i).insert(j);
-			}
-		}
-	}
+	construct_rooms();
 	connect_rooms();
+	add_states();
 }
 
+/* Member Functions */
+
+/*
+Move wumpus to a random location in an adjacent room.
+Ensures the rules of hunt the wumpus are met after the move.
+*/
+void Cave::move_wump() {
+	Room& wump_room = rooms.at(wump_rnum);
+	remove_all(Item::wump);
+	remove_all(Item::stink);
+
+	int next_rnum = (rand() % (adj_count+1)) - 1;
+	Room& next_wump_room = (next_rnum == -1) ? wump_room
+			: *wump_room.adj.at(next_rnum);
+
+	add_cause_item(next_wump_room, Item::wump, Item::stink);
+	wump_rnum = next_wump_room.num();
+}
+
+/* Debug */
+
 ostream& operator<<(ostream& os, const Cave& c) {
-	for (int i = 0; i < Cave::total_rooms; ++i) {
+	for (int i = 0; i < total_rooms; ++i) {
 		os << c.rooms.at(i);
 	}
 	return os;
@@ -145,8 +187,18 @@ int main()
 try {
 
 	// Simulate cave management
-	Cave c; 
-	cout << c;
+	srand(time(nullptr));
+	Cave c;
+	for (int i = 0; i < 10; ++i) {
+		cout << *c.rand_room();
+	}
+	const Room* r = c.rand_room(); // no const gives compile error
+						// this is a good thing!!
+	Room* r2 = r->adj.at(0);
+	r2->adj.at(0) = nullptr;
+	r2->adj.at(1) = nullptr;
+	r2->adj.at(2) = nullptr;
+	cout << *r2 << endl;
 
 	return 0;
 }
