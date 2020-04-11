@@ -18,7 +18,7 @@ So change the condition to <, and it will fix the problem (or simply comment out
 the return, but you might as well have both to make it as bug-free as possible)
 
 2.
-You need to put your template class implementation in the header file, rather than in its own cpp file. This is because the compiler needs to know what kind of type is being operated on so it can generate the proper functions/class that it needs. If you have an implementation file for a template class, you're trying to compile a file where the types are unknown, and the compiler won't be able to generate any functions (since it needs the corresponding type before it generates template functions/classes). Read more in Chapter 19 of PPP (I think 19.3.1, 19.3.1, 19.3.6 explain why)
+You need to put your template class implementation in the header file, rather than in its own cpp file. This is because the compiler needs to know what kind of type is being operated on so it can generate the proper functions/class that it needs. If you have an implementation file for a template class, you're trying to compile a file where the types are unknown, and the compiler won't be able to generate any functions (since it needs the corresponding type before it generates template functions/classes). Read more in Chapter 19 of PPP (I think 19.3.1, 19.3.2 explain why)
 
 3. 
 You need to give the "Item" enumeration an overloaded operator<< so that it can be a valid element of Vector_set. Otherwise, you get an error if that Vector_set is ever attempted to print.
@@ -41,6 +41,28 @@ However, notice that nothing's stopping us from doing this:
 
 We should think of a way to get around this issue. As of right now, adj is a public member variable. When we originally made it, we thought it would be used only by Cave, but now it can be used by Controller too, so we may need some extra protection. I think we need to rework the adj list so that it doesn't support this type of behaviour (maybe make an interface that returns a const pointer for const rooms, and a non-const pointer for non-const rooms). (Also make sure everything's OK for const rooms and a room's state).
 
+4.1
+Everything is now reworked. The room's state and adjacent members are protected. Non-const rooms can't modify the state or adjacent by setting the right member functions const. Also, there is now an interface for the adjacent vector, which actually makes the cave.cpp code a lot better. Moral of the story - generally, abstraction between classes is good. Try to keep all member variables of a class private (unless the struct is raw data) and define an interface to that data. This makes the code using that struct more readable, and ensures the struct is always in a good state. We still need a way to get access to a room's "state" vector, so we need to think of a way to define that interface later on. 
+
+We realized that returning a pointer for the adjacent vector is unnecessary - we can just return a const reference for const Rooms. If we need a single variable Room that takes on multiple other Rooms by using the const version of adj(), we can use a normal default-constructed Room object variable, and use copy-assignment on it iteratively to get access to other Rooms in the cave. It doesn't matter if that Room is in a different memory location - as long as it has the same adj vector, state Vector_set, and number, we are good to go.
+
+4.2
+const Room& adj(int i) const {
+	return *adjc.at(i);
+}
+This returns a const reference to a Room. This means that we can't change the representation of this room by calling its non-const functions. We have a limited interface to it. We can do something like:
+
+const Room a_room = other_room.adj(i);
+
+Where other_room is a const Room. In this case, a_room is copy-constructed with other_room.adj(i) (the reference to an adjacent room of other_room). Copy assignment won't work on const Rooms, I'm pretty sure it's non-const by default (which makes sense, if you copy-assign an object, you are changing it's representation). All this will work if we got rid of the const at the start of that constructor statement, now we can actually change a_room's representation (since it's a different, it won't affect other_room's i'th adjacent room). We wouldn't want to do that in this context, but we can if we wanted. Finally, we can't do something like this:
+
+Room& a_room = other_room.adj(i);
+
+since the reference is not constant, but other_room is a const room and so it's adj member function will return a const reference.
+
+4.2
+I just realized that we can't work with Room objects if we want them to be const - we won't be ably to copy-assign to change current room in the controller class. So, we had to go back to the original way - we work with pointers, and we have current_room be a const pointer so we can change where it points to but not it's representation. 
+
 5.
 Cave::Cave()
 	: rooms(total_rooms), avail(total_rooms)
@@ -53,6 +75,8 @@ Cave::Cave()
 	add_states();
 }
 If we had created Room pointers on the heap and had a vector of room pointers, we would need to deal with memory management here. We would need to delete the room pointers after each iteration of the while loop (except the first), otherwise the rooms allocated on the heap would leak. We don't have to because everything is allocated locally. In our case, each failure will simply overwrite the rooms, and reconstruct the availability sets (remember, adding the same element twice to a vector_set will just not add the element, so reconstructing the availability sets is fine.
+
+6. Question: Cave should be a class with only 1 instance (this way we can call srand() in the constructor and not have to worry about multiple srand()s being called). Is there something in C++ to let us distinguish this? I think "static" is what we want here.
 
 
 Random stuff

@@ -9,8 +9,7 @@ Add cause item (pit, bat, wump), surrounded by effect item
 void Cave::add_cause_item(Room& r, Item cause, Item effect) {
 	r.add_item(cause);
 	for (int i = 0; i < adj_count; ++i) {
-		Room& adj_room = *r.adj.at(i);
-		adj_room.add_item(effect); 
+		r.adj(i)->add_item(effect);
 	}
 }
 
@@ -29,9 +28,9 @@ void Cave::remove_all(Item itm) {
 Return true whenever r1 and r2 are in eachother's 
 availability sets
 */
-bool Cave::connectable(const Room& r1, const Room& r2) {
-	return avail.at(r1.num()).in(r2.num()) 
-		&& avail.at(r2.num()).in(r1.num());
+bool Cave::connectable(int r1_num, int r2_num) {
+	return avail.at(r1_num).in(r2_num) 
+		&& avail.at(r2_num).in(r1_num);
 }
 
 // Remove room #n from all availability sets
@@ -43,7 +42,8 @@ void Cave::remove_from_avail(int n) {
 
 /*
 Initialize data structures so rooms can be connected
-Set up rooms vector and availability sets
+Set up rooms vector and availability sets. 
+Overwrite previous rooms vector and availability sets if needed
 */
 void Cave::construct_rooms() {
 	for (int i = 0; i < total_rooms; ++i) {
@@ -63,24 +63,14 @@ Connect 2 rooms, and make the corresponding changes in their
 availability set. 
 */
 void Cave::connect(Room& r1, Room& r2) {
-	// Assertions
-	if (!r1.has_adj() || !r2.has_adj()) {
-		throw runtime_error("Cave::connect: Attempted to connect"
-				" a room that has its adjacency vector full");
-	}
-	if (!connectable(r1, r2)) {
+	if (!connectable(r1.num(), r2.num())) {
 		throw runtime_error("Cave::connect: Attempted to connect"
 				" 2 rooms that aren't in eachother's availability"
 				" sets");
 	}
 
-	// Add edge between r1 and r2
-	int r1_i = 0;
-	int r2_i = 0;
-	while (r1.adj.at(r1_i) != nullptr) ++r1_i;
-	while (r2.adj.at(r2_i) != nullptr) ++r2_i;
-	r1.adj.at(r1_i) = &r2;
-	r2.adj.at(r2_i) = &r1;
+	r1.set_adj(&r2);
+	r2.set_adj(&r1);
 
 	// r1 and r2 no longer available to eachother
 	avail.at(r1.num()).remove(r2.num());
@@ -96,11 +86,9 @@ void Cave::connect(Room& r1, Room& r2) {
 }
 
 /*
-Randomly connect each room in the rooms vector
-This is done by setting their adjacency vectors properly
-After its execution, each room is connected to exactly 
-adj_count rooms. The adj_count rooms are unique and no 
-room is connected to itself
+Randomly connect each room in the rooms vector.
+Make sure the connections leave the cave in a good state
+(each room has 3 connected rooms, the connection is both ways).
 May fail or succeed, and must be called again if failure.
 Fails when the availability set of a room is 0 when it 
 shouldn't be.
@@ -110,11 +98,11 @@ bool Cave::connect_rooms() {
 		Room& curr_room = rooms.at(i);
 
 		for (int j = 0; j < adj_count; ++j) {
-			if (curr_room.adj.at(j)) // adj[j] already set
+			if (curr_room.adj(j)) // adj[j] already set
 				continue;
 
 			Vector_set<int>& curr_avail = avail.at(i);
-			if (curr_avail.size() == 0) {return false; }// Failure
+			if (curr_avail.size() == 0) return false; // Failure
 
 			int rnum = curr_avail.get_rand();
 			Room& rand_room = rooms.at(rnum);
@@ -128,10 +116,7 @@ bool Cave::connect_rooms() {
 /*
 Add items to each room, providing the state of each room.
 Ensures the cave is in a good state - the rules of Hunt the
-Wumpus are not broken.
-Doesn't need to be random - the randomness in connect_rooms
-takes care of that for us. This allows us to guarantee that
-room 0 has no cause items (but it may have effect items)
+Wumpus are not broken. Guarantee's room 0 has no cause items.
 */
 void Cave::add_states() {
 	if (pit_count+bat_count+1 >= total_rooms) { // 1 for wumpus
@@ -160,6 +145,7 @@ Cave::Cave()
 		construct_rooms();
 		success = connect_rooms();
 	}
+	// Every room that Cave has is fully connected at this point.
 	add_states();
 }
 
@@ -167,6 +153,7 @@ Cave::Cave()
 
 /*
 Move wumpus to a random location in an adjacent room.
+Alternatively, wumpus may stay in the same room.
 Ensures the rules of hunt the wumpus are met after the move.
 */
 void Cave::move_wump() {
@@ -174,9 +161,9 @@ void Cave::move_wump() {
 	remove_all(Item::wump);
 	remove_all(Item::stink);
 
-	int next_rnum = (rand() % (adj_count+1)) - 1;
-	Room& next_wump_room = (next_rnum == -1) ? wump_room
-			: *wump_room.adj.at(next_rnum);
+	int index = (rand() % (adj_count+1)) - 1;
+	Room& next_wump_room = (index == -1) ? wump_room
+			: *wump_room.adj(index);
 
 	add_cause_item(next_wump_room, Item::wump, Item::stink);
 	wump_rnum = next_wump_room.num();
@@ -189,21 +176,4 @@ ostream& operator<<(ostream& os, const Cave& c) {
 		os << c.rooms.at(i);
 	}
 	return os;
-}
-
-int main() 
-try {
-
-	// Simulate cave management
-	srand(time(nullptr));
-	Cave c;
-	cout << c;
-
-	return 0;
-}
-catch(exception& e) {
-	cerr << "Error: " << e.what() << ".\n";
-}
-catch (...) {
-	cerr << "Error: Unknown exception.\n";
 }
