@@ -25,6 +25,7 @@ Returns state of game after move.
 Game_state Controller::move(int rnum) {
 	curr = curr->adj_by_rnum(rnum);
 
+	Game_state gs = Game_state::resume;
 	if (curr->has_item(Item::wump)) 
 		return Game_state::loss_wump;
 	if (curr->has_item(Item::bat)) 
@@ -59,23 +60,24 @@ Shoot arrow, trajectory defined by rnums.
 If the trajectory doesn't make sense with respect to cave layout,
 the shot will be "randomized". 
 Logically, shoot_arrow handles the boolean logic of the many cases
-that occur when you shoot an arrow, calls useful functions,
+that occur when you shoot an arrow, calls relevant functions,
 and orders the function calls in the proper manner.
 */
 Game_state Controller::shoot_arrow(const vector<int>& rnums) {
 	if (rnums.size() != arrow_traverse_len) {
 		ostringstream error_msg;
-		error_msg << "Arrow trajectory vector must have size " 
-			<< arrow_traverse_len;
+		error_msg << "Controller::shoot_arrow: Arrow trajectory "
+			"vector must have size " << arrow_traverse_len;
 		throw runtime_error(error_msg.str());
 	}
-
-	// Check arrows / deplete arrows
-	if (arrow_count == 0) 
-		return Game_state::no_arrow;
-	--arrow_count;
+	if (a_count <= 0) {
+		throw runtime_error("Controller::shoot_arrow: "
+			"Called with a_count <= 0");
+	}
 
 	// Shoot
+	--a_count;
+
 	int i = 0;
 	const Room* arrow_next = curr->adj_by_rnum(rnums.at(i));
 	Game_state gs = shoot(rnums, i+1, arrow_next);
@@ -87,14 +89,21 @@ Game_state Controller::shoot_arrow(const vector<int>& rnums) {
 	if (curr->has_item(Item::wump))
 		return Game_state::loss_wump;
 
+	if (a_count == 0) 
+		return Game_state::loss_no_arrow;
 	return Game_state::resume;
 }
 
 // DEBUG
+/*
+CHANGE ARROW COUNT SIZE ITS TOO BIG RIGHT NOW OKOKOOKOKKOKOK BYE
+ALSO MAKE SURE SEEDRAND IS DONE
+*/
 int main() 
 try {
 
-	srand(time(nullptr)); // GET RID OF THIS TO TEST 
+	//srand(time(nullptr)); // GET RID OF THIS TO TEST 
+
 	Cave cave;
 	Controller c {cave};
 	cout << cave;
@@ -132,7 +141,7 @@ try {
 		if (gs == Game_state::loss_wump) {
 			cout << "YOU GOT EATEN\n";
 		}
-		if (gs == Game_state::no_arrow) {
+		if (gs == Game_state::loss_no_arrow) {
 			cout << "No arrow!!!\n";
 		}
 		
