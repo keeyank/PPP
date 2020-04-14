@@ -3,10 +3,12 @@
 /*
 All 'action' member functions of controller should return
 a game state, based on the cave layout. Every Game_state 
-except for resume and bats must be followed by game termination.
+except for resume and bats/no_bats must be followed by
+game termination. 
 */
 enum struct Game_state {
-	resume, win, loss_pit, loss_wump, loss_shot, loss_no_arrow, bats
+	resume, win, loss_pit, loss_wump, loss_shot, loss_no_arrow, 
+	bats, no_bats
 };
 
 /*
@@ -26,7 +28,7 @@ struct Controller {
 	/* Action functions */
 
 	// Move to room #rnum
-	Game_state move(int rnum);
+	pair<Game_state, Game_state> move(int rnum);
 	// Shoot arrow, trajectory defined by rnums
 	Game_state shoot_arrow(const vector<int>& rnums);
 

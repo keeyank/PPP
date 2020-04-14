@@ -78,6 +78,8 @@ If we had created Room pointers on the heap and had a vector of room pointers, w
 
 6. Question: Cave should be a class with only 1 instance (this way we can call srand() in the constructor and not have to worry about multiple srand()s being called). Is there something in C++ to let us distinguish this? I think "static" is what we want here.
 
+7. Not sure if I did the Game_state enum right - everything is logical apart from the "bats / no_bats" enum. It's there so we can inform the caller of Move whether bats were involved (so they can output a corresponding message), but bats/no_bats isn't related to the rest of the enums. All of the other enums refer specifically to program execution (whether to terminate with a win, loss, or resume). I need the bats enum in order to separate the game logic from the output messages, and this is the best way I can think of as of now.
+
 
 Random stuff
 

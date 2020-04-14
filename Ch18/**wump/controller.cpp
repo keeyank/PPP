@@ -20,19 +20,24 @@ Game_state Controller::bat_move() {
 /*
 Move to room #rnum if it's viable from current room.
 Else, move to a non-specified viable room. 
-Returns state of game after move.
+Returns pair of Game_states - the first refers to the
+win/loss state, second refers to whether bats were encountered.
 */
-Game_state Controller::move(int rnum) {
+pair<Game_state, Game_state> Controller::move(int rnum) {
 	curr = curr->adj_by_rnum(rnum);
+	pair<Game_state, Game_state> gs {Game_state::resume, 
+			Game_state::no_bats};
 
-	Game_state gs = Game_state::resume;
 	if (curr->has_item(Item::wump)) 
-		return Game_state::loss_wump;
-	if (curr->has_item(Item::bat)) 
-		return bat_move();
+		gs.first = Game_state::loss_wump;
+	if (curr->has_item(Item::bat)) {
+		gs.first = bat_move();
+		gs.second = Game_state::bats;
+	}
 	if (curr->has_item(Item::pit)) 
-		return Game_state::loss_pit;
-	return Game_state::resume;
+		gs.first = Game_state::loss_pit;
+
+	return gs;
 }
 
 /*
@@ -111,17 +116,24 @@ try {
 	while (true) {
 		int hi;
 		cin >> hi;
-		Game_state gs = c.move(hi);
+		//Game_state gs = (c.move(hi)).first; // Cool how you can do this!
+		auto gsp = c.move(hi);
 		cout << c;
 
-		if (gs == Game_state::loss_wump) {
+		if (gsp.first == Game_state::loss_wump) {
 			cout << "YOU GOT EATEN\n";
 		}
-		if (gs == Game_state::loss_pit) {
+		if (gsp.first == Game_state::loss_pit) {
 			cout << "YOU GOT FALLED DOWN\n";
 		}
-		if (gs == Game_state::resume) {
+		if (gsp.first == Game_state::resume) {
 			cout << "You can resume\n";
+		}
+		if (gsp.second == Game_state::bats) {
+			cout << "Bats eated ya\n";
+		}
+		if (gsp.second == Game_state::no_bats) {
+			cout << "Babts non-eated yu\n";
 		}
 
 		vector<int> vi(3);
@@ -129,7 +141,7 @@ try {
 			cin >> vi[i];
 		}
 
-		gs = c.shoot_arrow(vi);
+		Game_state gs = c.shoot_arrow(vi);
 
 		if (gs == Game_state::resume) {
 			cout << "You can resume\n";
