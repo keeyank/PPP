@@ -48,6 +48,13 @@ struct Controller {
 		return curr->has_item(Item::stink);
 	}
 
+	int adj_num(int i) {
+		return curr->adj(i)->num();
+	}
+	int num() {
+		return curr->num();
+	}
+	
 	friend ostream& operator<<(ostream& os, const Controller& c) {
 		return os << "Current room: " << *c.curr << endl;
 	}

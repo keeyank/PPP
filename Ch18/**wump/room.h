@@ -29,9 +29,6 @@ struct Room {
 	Room* adj(int i) {
 		return adjc.at(i);
 	}
-	const Room* adj(int i) const {
-		return adjc.at(i);
-	}
 	// Return true if i'th adjacent room available
 	bool adj_available(int i) const {
 		return adjc.at(i) == nullptr;
@@ -68,7 +65,10 @@ struct Room {
 	// Get adjacent room with number rnum
 	// If no such room exists, return last room
 	const Room* adj_by_rnum(int rnum) const;
-
+	
+	const Room* adj(int i) const {
+		return adjc.at(i);
+	}
 
 	// Miscellaneous
 
