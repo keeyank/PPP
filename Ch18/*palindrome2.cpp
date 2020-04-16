@@ -65,10 +65,10 @@ void read_to_dynamic_cstr(istream& is, Dynamic_cstr& s) {
 
 void eat_whitespace(istream& is) {
 	char c = ' ';
-	while (isspace(c)) {
+	while (isspace(c) && is) {
 		cin.get(c);
 	}
-	cin.putback(c); // putback none-whitespace char
+	cin.putback(c); // putback non-whitespace char
 }
 
 // Exercise 18 part 2
