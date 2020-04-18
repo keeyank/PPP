@@ -74,9 +74,7 @@ struct Room {
 
 	// Get room number
 	int num() const {return n;}
-
-	friend ostream& operator<<(ostream& is, const Room& r);
-
+	
 private:
 	// Room number
 	int n = -1;

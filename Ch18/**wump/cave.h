@@ -21,8 +21,6 @@ struct Cave {
 	// Move wump to a random location adjacent room
 	void move_wump();
 
-	friend ostream& operator<<(ostream& os, const Cave& c);
-
 private:
 	// Invariant - room[i] has number set to i
 	// This lets us get access to room #i by indexing this vector

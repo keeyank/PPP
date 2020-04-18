@@ -54,10 +54,6 @@ struct Controller {
 	int num() {
 		return curr->num();
 	}
-	
-	friend ostream& operator<<(ostream& os, const Controller& c) {
-		return os << "Current room: " << *c.curr << endl;
-	}
 
 private:
 	Game_state bat_move();

@@ -124,15 +124,21 @@ void Cave::add_states() {
 					" to hold all of the items");
 	}
 	
-	int rnum = 1; // Keeps track of current room num
+	Vector_set<int> avl;
+	int rnum = -1;
+	for (int i = 1; i < total_rooms; ++i) avl.insert(i);
+
 	for (int i = 0; i < pit_count; ++i) {
+		rnum = avl.get_rand();
 		add_cause_item(rooms.at(rnum), Item::pit, Item::wind);
-		++rnum;
+		avl.remove(rnum);
 	}
 	for (int i = 0; i < bat_count; ++i) {
+		rnum = avl.get_rand();
 		add_cause_item(rooms.at(rnum), Item::bat, Item::noise);
-		++rnum;
+		avl.remove(rnum);
 	}
+	rnum = avl.get_rand();
 	add_cause_item(rooms.at(rnum), Item::wump, Item::stink);
 	wump_rnum = rnum;
 }
@@ -167,13 +173,4 @@ void Cave::move_wump() {
 
 	add_cause_item(next_wump_room, Item::wump, Item::stink);
 	wump_rnum = next_wump_room.num();
-}
-
-/* Debug */
-
-ostream& operator<<(ostream& os, const Cave& c) {
-	for (int i = 0; i < total_rooms; ++i) {
-		os << c.rooms.at(i);
-	}
-	return os;
 }

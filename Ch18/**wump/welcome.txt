@@ -1,0 +1,11 @@
+Welcome to Hunt the Wumpus! In this game, you need to rely on your senses to navigate through a maze-like cavern. Your goal is to shoot the Wumpus with a sleeping dart. Each room of the cave is connected to three other rooms, and each room has a corresponding room number. There are 20 rooms in the cave. Every turn, you can see what room you're in, as well as the other 3 rooms. Also, you will sense some interesting things about the room you're residing in...
+
+If you feel a breeze, there is a bottomless pit in a nearby room. Be careful, if you fall through a bottomless pit, you die!
+If you hear a screeching noise, there are super-bats in a nearby room. If you go into a room with super-bats, they'll pick you up and drop you at a random room in the cave.
+If you smell something really yucky, the Wumpus is in a nearby room. Watch out, if you enter his room, he'll eat you! 
+
+You can navigate through the cave by entering the command "m[room#]". For example, m4 will take you to room 4, provided it's connected to your current room. If it isn't, you'll go to a random room that is connected to your current room. 
+
+You want to try to locate the Wumpus, using your senses as your guide. Once you do, you can shoot him with the sleeping dart. To do that, enter the command "s[room#]-[room#]-[room#]". For example, s4-2-8 will shoot the dart through each room 4, 2, and 8 (assuming 4 is connected to the current room, 2 is connected to 4, and 8 is connected to 2). If this isn't the case, the dart will randomly pick which rooms to travel through. Don't be too reckless when shooting darts, you only have 5 darts available, and be EXTRA careful not to accidentally shoot yourself!
+
+Type 'q' if you want to quit. Have fun!

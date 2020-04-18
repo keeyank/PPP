@@ -70,19 +70,3 @@ const Room* Room::adj_by_rnum(int rnum) const {
 	}
 	return adj(i);
 }
-
-ostream& operator<<(ostream& os, const Room& r) {
-	os << "\nRoom #" << setw(3) << r.n << " at loc "
-		<< &r << "\nAdjacents:";
-	for (int i = 0; i < adj_count; ++i) {
-		if (r.adjc.at(i)) {
-			os << "\nRoom #" << setw(3) << r.adjc.at(i)->n 
-				<< " at loc " << r.adjc.at(i);
-		}
-		else {
-			os << "\nnullptr";
-		}
-	}
-	os << "\nState: " << r.state << endl;
-	return os;
-}

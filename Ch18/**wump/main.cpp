@@ -1,6 +1,7 @@
 #include <string>
 #include <sstream>
 #include <utility>
+#include <fstream>
 
 #include "controller.h"
 
@@ -10,18 +11,7 @@ enum struct Action {
 
 /* Input functions */
 
-// Continuously eat whitespace until non-whitespace found
-istream& eat_space(istream& is) {
-	char c = ' ';
-	while (isspace(c) && is) { 
-		is.get(c);
-	}
-	if (is) is.putback(c);
-	return is;
-}
-
-Action get_input_move(istream& is, vector<int>& act_seq)
-{
+Action get_input_move(istream& is, vector<int>& act_seq) {
 	char num_test {};
 	is.get(num_test);
 	if (!is || !isdigit(num_test)) {
@@ -38,8 +28,7 @@ Action get_input_move(istream& is, vector<int>& act_seq)
 	return Action::move;
 }
 
-Action get_input_shoot(istream& is, vector<int>& act_seq)
-{
+Action get_input_shoot(istream& is, vector<int>& act_seq) {
 	for (int i = 0; i < arrow_traverse_len; ++i) {
 		char num_test {};
 		is.get(num_test);
@@ -55,11 +44,10 @@ Action get_input_shoot(istream& is, vector<int>& act_seq)
 			if (!is || dash_test != '-') 
 				return Action::bad_shoot;
 		}
-		else {
-			if (!is.eof()) 
-				return Action::bad_shoot;
-		}
 	}
+
+	if (!is.eof()) 
+		return Action::bad_shoot;
 
 	return Action::shoot;
 }
@@ -78,19 +66,18 @@ act_seq[0] read into for move, entire act_seq vector read into for
 shoot. Reads a single line of input. 
 */
 Action get_input(istream& is, vector<int>& act_seq) {
-	string err_msg = "get_input: Input stream in bad state";
-	eat_space(is);
-	if (!is) throw runtime_error(err_msg);
-
 	string line;
 	getline(is, line);
-	if (!is) throw runtime_error(err_msg);
+	if (!is) {
+		throw runtime_error("get_input:"
+			" Input stream in bad state");
+	}
 
 	istringstream iss {line};
 
-	// iss has atleast 1 char
 	char act_ch {}; // action char
 	iss.get(act_ch);
+	if (!iss) return Action::bad_action;
 
 	switch (act_ch) {
 		case 'm':
@@ -215,11 +202,11 @@ void output_arrow_count(int arrow_count) {
 	cout << "You have " << arrow_count << " arrows remaining.\n";
 }
 
-int main() 
-try {
+/* Game loop */
 
+void game_loop() {
 	// Generate cave + controller
-	//srand(time(nullptr));
+	srand(time(nullptr));
 	Cave cave; 
 	Controller c {cave};
 
@@ -235,16 +222,16 @@ try {
 
 		switch (act) {
 			case Action::move: { // Scope for variable definitions
-				auto gsp {c.move(act_seq.at(0))};
+				auto gsp {c.move(act_seq.at(0))}; // Game state pair
 				bool end_game = output_move(gsp);
-				if (end_game) return 0;
+				if (end_game) return;
 				output_curr_room(c);
 				break;
 			}
 			case Action::shoot: {
 				Game_state gs = c.shoot_arrow(act_seq);
 				bool end_game = output_shoot(gs);
-				if (end_game) return 0;
+				if (end_game) return;
 				output_arrow_count(c.arrow_count());
 				output_curr_room(c);
 				break;
@@ -259,9 +246,45 @@ try {
 				output_bad_action();
 				break;
 			case Action::quit:
-				return 0;
+				return;
 		}
 	} 
+
+}
+
+/* Basic scaffolding */
+
+void output_welcome() {
+	ifstream ifs {"welcome.txt"};
+	for (string line; getline(ifs, line);) {
+		cout << line << endl;
+	}
+}
+
+bool input_again() {
+	cout << "Play again? (y/n)\n";
+	for (string s; getline(cin, s);) {
+		if (!cin) {
+			throw runtime_error("input_again: "
+				"Input stream in bad state");
+		}
+
+		if (s == "y") return true;
+		else if (s == "n") return false;
+		else cout << "Invalid command.\n";
+	}
+	return false;
+}
+
+int main() 
+try {
+	output_welcome();
+
+	bool again = true;
+	while (again) {
+		game_loop();
+		again = input_again();
+	}
 
 	return 0;
 }

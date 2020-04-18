@@ -17,11 +17,16 @@ be. This means that we will dereference somewhere in memory that we shouldn't!!
 So change the condition to <, and it will fix the problem (or simply comment out
 the return, but you might as well have both to make it as bug-free as possible)
 
+1.1
+
+Be careful when using iterators with vectors. while erasing/inserting elements. Tends not to behave too well. Works well here because once we erase the element, we are finished. See Chapter 20 in PPP for more details.
+
+
 2.
 You need to put your template class implementation in the header file, rather than in its own cpp file. This is because the compiler needs to know what kind of type is being operated on so it can generate the proper functions/class that it needs. If you have an implementation file for a template class, you're trying to compile a file where the types are unknown, and the compiler won't be able to generate any functions (since it needs the corresponding type before it generates template functions/classes). Read more in Chapter 19 of PPP (I think 19.3.1, 19.3.2 explain why)
 
 3. 
-You need to give the "Item" enumeration an overloaded operator<< so that it can be a valid element of Vector_set. Otherwise, you get an error if that Vector_set is ever attempted to print.
+You need to give the "Item" enumeration an overloaded operator<< so that it can be a valid element of Vector_set. Otherwise, you get an error if that Vector_set is ever attempted to print. It generates a compiler error because it when it generates the function for print for vector sets.
 
 4.
 const Room* rand_room() {
