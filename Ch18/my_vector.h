@@ -60,7 +60,7 @@ Vector::Vector(Vector&& v)
 
 Vector& Vector::operator=(const Vector& v) {
 	int* p = new int[v.sz];
-	std::copy(v.elem, v.elem + sz, p);
+	std::copy(v.elem, v.elem + v.sz, p);
 	delete[] elem;
 	elem = p;
 	sz = v.sz;
