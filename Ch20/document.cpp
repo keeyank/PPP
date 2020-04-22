@@ -5,6 +5,12 @@
 
 using namespace std;
 
+/*
+Invariants: 
+Each line ends with a \n, apart from final line
+Always atleast 1 line
+Final line is empty vector
+*/
 struct Document {
 
 	struct Iterator {
@@ -93,23 +99,30 @@ bool match(Iter1 f1, const Iter1 e1, Iter2 f2, const Iter2 e2) {
 	}
 }
 
+/*
+Note the usage of integer index rather than iterators for vectors.
+This is because vector iterators can (and likely will) be
+invalidated after our vector resize operations, like erase and
+insert.
+By Document's implementation, find and replace will never replace
+anything if f includes \n. Also, we can't have r include \n,
+since that would falsify Document's invariant. 
+*/
 int Document::find_and_replace(string f, string) {
 	if (f.size() == 0) return 0;
-
-	Iterator it = begin();
 	int count = 0;
 
-	while (true) {
-		if (it == end()) return count;
-		
-		if (*it == f.front()) {
-			if (match(it, end(), f.begin(), f.end())) {
+	for (auto ln_it = doc.begin(); ln_it != doc.end(); ++ln_it) {
+
+		for (int i = 0; ln_it->begin()+i != ln_it->end(); ++i) {
+			if (match(ln_it->begin()+i, ln_it->end(),
+					f.begin(), f.end())) {
 				++count;
 			}
 		}
-
-		++it;
 	}
+
+	return count;
 }
 
 /*
@@ -155,6 +168,6 @@ int main() {
 	Document d;
 	ifs >> d;
 	
-	cout << d.find_and_replace("aa") << endl;
+	cout << d.find_and_replace("the monkey") << endl;
 	return 0;
 }
