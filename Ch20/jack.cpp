@@ -52,6 +52,24 @@ Iter high(Iter first, Iter last) {
 
 /*---------------------------------------------*/
 
+/*
+Remember f1++ returns the iterator f1 before the increment
+Unlike ++f1, which returns the iterator f1 after the increment
+We could have equivelantly done
+*f2 = *f1;
+++f1;
+++f2;
+*/
+template<typename Itr1, typename Itr2>
+	// requires Itr1 be input iterator, Itr2 be output iterator
+void mycopy(Itr1 f1, const Itr1& e1, Itr2 f2) {
+	while (f1 != e1) {
+		*f2++ = *f1++;
+	}
+}
+
+/*---------------------------------------------*/
+
 int main() {
 	int jack_count;
 	int* jack_data = read_jack(&jack_count);
@@ -67,6 +85,22 @@ int main() {
 
 	cout << "Jill's max: " << *jill_high
 		<< "; Jack's max: " << *jack_high << endl;
+
+	/* Exercise 5 */
+
+	vector<string> jombo_data {"aeh","wer","or","asf","awe","otr",
+			"wer", "wer","as","gsds","gdw","ger","sti","stu","moh",
+			"xyo", "zzz"};
+	auto jombo_max = high(jombo_data.begin(), jombo_data.end());
+	cout << "How could we forget Jombo! Jombo's max: "
+		<< *jombo_max << endl;
+
+	/* Exercise 10 */
+	copy(jack_data, jack_data+jack_count, jill_data.begin());
+	sort(jill_data.begin(), jill_data.end());
+	printout(jack_data, jack_data+jack_count);
+	printout(jill_data.begin(), jill_data.end());
+	printout(jombo_data.begin(), jombo_data.end());
 
 	delete[] jack_data;
 	return 0;
