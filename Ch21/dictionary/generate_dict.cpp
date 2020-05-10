@@ -2,6 +2,7 @@
 #include <iostream>
 #include <fstream>
 #include <map>
+#include <set>
 #include <list>
 #include <utility>
 
@@ -81,8 +82,7 @@ list<string> generate_intermed_pass1(ifstream& ifs) {
 }
 
 /*
-Second pass. Remove's apostrophe, and adds each apostrophe-less string
-to the set of all words.
+Second pass. Remove's apostrophe.
 */
 list<string> generate_intermed_pass2(const list<string>& old_im) {
 	list<string> im {""};
@@ -97,13 +97,46 @@ list<string> generate_intermed_pass2(const list<string>& old_im) {
 	return im;
 }
 
+/*
+Third pass. Create the set of all words. 
+Note that this is innefficient - we could have done this in the 
+second pass. But it's more readable, and we are logically 
+separating tasks - one task is for removing apostrophes, another 
+is for creating the set of all words.
+*/
+set<string> generate_words_pass3(list<string> im) {
+	set<string> words {};
+	for (string s : im) words.insert(s);
+	return words;
+}
+
+/*
+Fourth pass. Replace any instance of a plural word with
+its non-plural version.
+*/
+list<string> generate_intermed_pass4(list<string>& im, 
+		const set<string>& ws) 
+{	
+	for (auto it = im.begin(); it != im.end(); ++it) {
+		if (it->back() == 's') {
+			string remove_s = *it;
+			remove_s.erase(remove_s.end()-1);
+			if (ws.find(remove_s) != ws.end()) *it = remove_s;
+		} 
+	}
+	return im;
+}
+
 /* 
-generate intermediary list holding words for further 
+Generate intermediary list holding words for further 
 processing. Requires 2 full passes of the data in ifs.
+Fun fact: We are using move constructor twice in this function!
 */
 list<string> generate_intermed(ifstream& ifs) {
-	list<string> intermed = generate_intermed_pass1(ifs);
-	return generate_intermed_pass2(intermed);
+	list<string> intermed {generate_intermed_pass1(ifs)};
+	intermed = generate_intermed_pass2(intermed);
+	set<string> words {generate_words_pass3(intermed)};
+	return generate_intermed_pass4(intermed, words);
 }
 
 /*
