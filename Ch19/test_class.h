@@ -55,5 +55,5 @@ struct X {
 };
 
 ostream& operator<<(ostream& os, const X& x) {
-	return cout << x.a << ' ' << x.b;
+	return os << x.a << ' ' << x.b;
 }

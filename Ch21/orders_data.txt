@@ -1,0 +1,48 @@
+{
+	bob 
+	341-mork-ave 
+	{
+		battalion-cruise 139.99 1
+		beyblades-lightning-slash 4.87 5
+		blankose-guitar 400.00 1
+	}
+}
+{
+	torg
+	345-mork-ave 
+	{
+		battalion-bruise 149.99 8
+		beyblades-lightning-slash 4.87 2
+		blankose-guitar 400.00 8
+		sonic-lost-jungle 20.00 1
+	}	
+}
+{
+	elven 
+	341-elfy-ave 
+	{
+		fat-leaf 0.41 194
+		funy-leaf 4.87 1
+		special-leaf 50.79 2
+		leaf 0.01 100
+		stinky-leaf 0.01 2
+	}
+}
+{
+	rocker
+	345-rock-ave 
+	{
+		rock 1.00 1
+	}	
+}
+{
+	elveny 
+	341-elfy-ave 
+	{
+		fat-leaf 0.41 12
+		funy-leaf 4.87 1
+		sonic-lost-jungle 20.00	 1
+		blankose-guitar 400.00 1
+		
+	}
+}

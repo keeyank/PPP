@@ -1,0 +1,107 @@
+{
+	bob
+	341-mork-ave
+	{
+		battalion-cruise 139.99 1
+		beyblades-lightning-slash 4.87 5
+		blankose-guitar 400 1
+	}
+}
+{
+	bob
+	341-mork-ave
+	{
+		battalion-cruise 139.99 1
+		beyblades-lightning-slash 4.87 5
+		blankose-guitar 400 1
+	}
+}
+{
+	brothamanbob
+	341-bro-lane
+	{
+		bro-spatula 2.25 1
+		funy-leaf 4.87 2
+		sonic-lost-jungle 20 4
+		blankose-guitar 400 3
+		canadian-bro 12.5 1
+		bro-poisonous-snake 98.99 1
+	}
+}
+{
+	elven
+	341-elfy-ave
+	{
+		fat-leaf 0.41 194
+		funy-leaf 4.87 1
+		special-leaf 50.79 2
+		leaf 0.01 100
+		stinky-leaf 0.01 2
+	}
+}
+{
+	elveny
+	341-elfy-ave
+	{
+		fat-leaf 0.41 12
+		funy-leaf 4.87 1
+		sonic-lost-jungle 20 1
+		blankose-guitar 400 1
+	}
+}
+{
+	elveny
+	341-elfy-ave
+	{
+		fat-leaf 0.41 12
+		funy-leaf 4.87 1
+		sonic-lost-jungle 20 1
+		blankose-guitar 400 1
+	}
+}
+{
+	foodeatboy
+	345-foodster-ave
+	{
+		yum-food 3 1
+	}
+}
+{
+	rocker
+	345-rock-ave
+	{
+		rock 1 1
+	}
+}
+{
+	rocker
+	345-rock-ave
+	{
+		rock 1 1
+	}
+}
+{
+	rockman
+	345-rockstar-ave
+	{
+		other-rock 1 2
+		rock 1 3
+	}
+}
+{
+	smelly-bob
+	341-mork-lane
+	{
+		how-to-smell-manual 24.99 1
+	}
+}
+{
+	torg
+	345-mork-ave
+	{
+		battalion-bruise 149.99 8
+		beyblades-lightning-slash 4.87 2
+		blankose-guitar 400 8
+		sonic-lost-jungle 20 1
+	}
+}

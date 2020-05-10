@@ -1,0 +1,10 @@
+frame 1 40.21
+paint 2 19.99
+tuna-steak 3 4.99
+big-steak 4 3.50
+funky-pop 5 1.00
+apple-cinnamon-sauce 6 0.80
+mario-sunshine 7 25.89
+bluray 8 209.19
+ford-m8-dunkle-edition 9 140200.00
+wacky-table 10 120.99

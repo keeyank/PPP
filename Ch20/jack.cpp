@@ -2,6 +2,7 @@
 #include <fstream>
 
 #include "container_stuff.h"
+#include "list.h"
 
 using namespace std;
 
@@ -40,9 +41,15 @@ int* high(int arr[], int count) {
 	return max;
 }
 
+/*
+Note - the first >= last check does not work for bidirectional
+iterators (like List's iterator). <= does not make sense as an 
+operation for List iterators - the underlying Link* may be located
+in arbitrary locations in the free store!
+*/
 template<typename Iter> // Requires Input_iterator
 Iter high(Iter first, Iter last) {
-	if (first >= last) return last;
+	//if (first >= last) return last;
 	Iter high = first;
 	for (Iter curr = first; curr != last; ++curr) {
 		if (*curr > *high) high = curr;
@@ -101,6 +108,14 @@ int main() {
 	printout(jack_data, jack_data+jack_count);
 	printout(jill_data.begin(), jill_data.end());
 	printout(jombo_data.begin(), jombo_data.end());
+
+	/* Exercise 12 */
+	List<int> bugy_data {4,4,1,4,5,2,4,1,0,5,2,6,8,29,3
+			,690,30,683,91,06,94,02,8};
+	List<int>::Iterator bugy_max = high(bugy_data.begin(),
+		 bugy_data.end());
+	cout << "Bugy in da house !! Bugy's max: " << *bugy_max << endl;
+	printout(bugy_data.begin(), bugy_data.end());
 
 	delete[] jack_data;
 	return 0;

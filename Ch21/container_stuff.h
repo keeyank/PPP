@@ -4,15 +4,28 @@
 
 using namespace std;
 
+template<typename C>
+	// Requires Container<C>
+void printout(const C& c, string delim = " ") {
+	printout(c.begin(), c.end(), delim);
+}
+
 template<typename Iter>
-	// Requires output iterator
-void printout(Iter first, Iter last) {
-	cout << "{";
+	// Requires bidirectional iterator
+	// and value_type<Iter> must have cout overloaded
+void printout(Iter first, Iter last, string delim = " ") {
+	cout << "{" << delim;
 	while (first != last) {
-		cout << *first << " ";
+		cout << *first << delim;
 		++first;
 	}
 	cout << "}\n";
+}
+
+template<typename C>
+	// Requires Container<C> with bidirectional iterator
+void reverse_printout(C c) {
+	reverse_printout(c.rbegin(), c.rend());
 }
 
 template<typename Iter>
@@ -57,6 +70,7 @@ istream& operator>>(istream& is, vector<T>& v) {
 	while (true) {
 		is >> val;
 		if (!is) return is;
+		if (val == -1) break;
 		v_tmp.push_back(val);
 
 		is.get(test);
